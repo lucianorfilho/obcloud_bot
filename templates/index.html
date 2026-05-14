@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exnova Signal Bot</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 { font-size: 1.3rem; color: #58a6ff; }
+    header span { font-size: 0.85rem; color: #8b949e; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 32px 16px; }
+
+    /* STATUS BAR */
+    .status-bar {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #f85149;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .status-dot.active { background: #3fb950; }
+
+    .stat { display: flex; flex-direction: column; }
+    .stat label { font-size: 0.7rem; color: #8b949e; text-transform: uppercase; }
+    .stat span { font-size: 1rem; font-weight: 600; color: #e6edf3; }
+
+    .btn {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-green { background: #238636; color: #fff; }
+    .btn-red   { background: #b62324; color: #fff; }
+    .btn-blue  { background: #1f6feb; color: #fff; }
+    .btn-gray  { background: #30363d; color: #e6edf3; }
+
+    /* GRID */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media(max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 24px;
+    }
+    .card h2 { font-size: 1rem; margin-bottom: 20px; color: #58a6ff; }
+
+    /* FORM */
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      color: #8b949e;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 9px 12px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #e6edf3;
+      font-size: 0.9rem;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #58a6ff;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* TABLE */
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th {
+      text-align: left;
+      padding: 8px 10px;
+      color: #8b949e;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      border-bottom: 1px solid #21262d;
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #21262d;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1c2128; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-call { background: #1a3a2a; color: #3fb950; }
+    .badge-put  { background: #3a1a1a; color: #f85149; }
+    .badge-ok   { background: #1a3a2a; color: #3fb950; }
+    .badge-fail { background: #3a1a1a; color: #f85149; }
+    .badge-test { background: #1a2a3a; color: #58a6ff; }
+
+    .btn-del {
+      background: none;
+      border: none;
+      color: #f85149;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    /* LOG */
+    .log-item {
+      padding: 10px;
+      border-bottom: 1px solid #21262d;
+      font-size: 0.82rem;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-time { color: #8b949e; min-width: 60px; }
+
+    .empty { color: #8b949e; font-size: 0.85rem; text-align: center; padding: 20px; }
+
+    /* MODE TOGGLE */
+    .mode-toggle {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ Exnova Signal Bot</h1>
+  <span id="clock">--:--:--</span>
+</header>
+
+<div class="container">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div style="display:flex;align-items:center">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Offline</span>
+    </div>
+
+    <div class="stat">
+      <label>Modo</label>
+      <span id="statMode">—</span>
+    </div>
+    <div class="stat">
+      <label>Executados hoje</label>
+      <span id="statExecuted">0</span>
+    </div>
+    <div class="stat">
+      <label>Próximo sinal</label>
+      <span id="statNext">—</span>
+    </div>
+
+    <div class="mode-toggle">
+      <button class="btn btn-blue" onclick="startBot('test')">▶ Modo Teste</button>
+      <button class="btn btn-green" onclick="startBot('live')">🚀 Modo Real</button>
+      <button class="btn btn-red" onclick="stopBot()">⏹ Parar</button>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- FORMULÁRIO DE SINAL -->
+    <div class="card">
+      <h2>➕ Adicionar Sinal</h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Horário</label>
+          <input type="time" id="sigTime" />
+        </div>
+        <div class="form-group">
+          <label>Par de Moedas</label>
+          <select id="sigPair">
+            <option>EURUSD</option>
+            <option>GBPUSD</option>
+            <option>USDJPY</option>
+            <option>AUDUSD</option>
+            <option>USDCAD</option>
+            <option>USDCHF</option>
+            <option>NZDUSD</option>
+            <option>EURGBP</option>
+            <option>EURJPY</option>
+            <option>GBPJPY</option>
+            <option>AUDCAD</option>
+            <option>EURAUD</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Direção</label>
+          <select id="sigDirection">
+            <option value="call">📈 CALL (Compra)</option>
+            <option value="put">📉 PUT (Venda)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Expiração (min)</label>
+          <select id="sigExpiration">
+            <option value="1">1 minuto</option>
+            <option value="2">2 minutos</option>
+            <option value="3">3 minutos</option>
+            <option value="5">5 minutos</option>
+            <option value="10">10 minutos</option>
+            <option value="15">15 minutos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Valor da Operação ($)</label>
+        <input type="number" id="sigAmount" value="10" min="1" step="0.5" />
+      </div>
+
+      <button class="btn btn-blue" style="width:100%" onclick="addSignal()">
+        ➕ Adicionar Sinal
+      </button>
+    </div>
+
+    <!-- LISTA DE SINAIS -->
+    <div class="card">
+      <h2 style="display:flex;justify-content:space-between">
+        📋 Sinais do Dia
+        <button class="btn btn-gray" style="font-size:0.75rem;padding:5px 12px"
+          onclick="clearAll()">🗑 Limpar todos</button>
+      </h2>
+
+      <div id="signalsList">
+        <div class="empty">Nenhum sinal cadastrado</div>
+      </div>
+    </div>
+
+    <!-- LOG DE EXECUÇÃO -->
+    <div class="card" style="grid-column: 1 / -1">
+      <h2>📜 Log de Execuções</h2>
+      <div id="logList">
+        <div class="empty">Nenhuma execução ainda</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── Relógio ──────────────────────────────────────────────
+  function updateClock() {
+    const now = new Date();
+    document.getElementById("clock").textContent =
+      now.toLocaleTimeString("pt-BR");
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ── Adicionar sinal ──────────────────────────────────────
+  async function addSignal() {
+    const signal = {
+      time:       document.getElementById("sigTime").value,
+      pair:       document.getElementById("sigPair").value,
+      direction:  document.getElementById("sigDirection").value,
+      expiration: parseInt(document.getElementById("sigExpiration").value),
+      amount:     parseFloat(document.getElementById("sigAmount").value),
+    };
+
+    if (!signal.time) { alert("Informe o horário do sinal!"); return; }
+
+    const res = await fetch("/api/signals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(signal),
+    });
+
+    if (res.ok) {
+      loadSignals();
+    } else {
+      alert("Erro ao adicionar sinal!");
+    }
+  }
+
+  // ── Carregar sinais ──────────────────────────────────────
+  async function loadSignals() {
+    const res = await fetch("/api/signals");
+    const signals = await res.json();
+    const container = document.getElementById("signalsList");
+
+    if (signals.length === 0) {
+      container.innerHTML = '<div class="empty">Nenhum sinal cadastrado</div>';
+      return;
+    }
+
+    // Ordena por horário
+    signals.sort((a, b) => a.time.localeCompare(b.time));
+
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Hora</th>
+            <th>Par</th>
+            <th>Direção</th>
+            <th>Exp.</th>
+            <th>Valor</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${signals.map(s => `
+            <tr>
+              <td><strong>${s.time}</strong></td>
+              <td>${s.pair}</td>
+              <td>
+                <span class="badge badge-${s.direction}">
+                  ${s.direction === 'call' ? '📈 CALL' : '📉 PUT'}
+                </span>
+              </td>
+              <td>${s.expiration}min</td>
+              <td>$${parseFloat(s.amount).toFixed(2)}</td>
+              <td>
+                <button class="btn-del" onclick="deleteSignal(${s.id})">✕</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  // ── Deletar sinal ────────────────────────────────────────
+  async function deleteSignal(id) {
+    await fetch(`/api/signals/${id}`, { method: "DELETE" });
+    loadSignals();
+  }
+
+  // ── Limpar todos ─────────────────────────────────────────
+  async function clearAll() {
+    if (!confirm("Limpar todos os sinais?")) return;
+    await fetch("/api/signals/clear", { method: "DELETE" });
+    loadSignals();
+  }
+
+  // ── Iniciar bot ──────────────────────────────────────────
+  async function startBot(mode) {
+    const label = mode === 'test' ? 'TESTE' : 'REAL';
+    if (mode === 'live' && !confirm(`⚠️ Iniciar em modo REAL?\nIsso vai executar operações com dinheiro real!`)) return;
+
+    await fetch("/api/bot/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode }),
+    });
+  }
+
+  // ── Parar bot ────────────────────────────────────────────
+  async function stopBot() {
+    await fetch("/api/bot/stop", { method: "POST" });
+  }
+
+  // ── Status ───────────────────────────────────────────────
+  async function updateStatus() {
+    try {
+      const res = await fetch("/api/status");
+      const data = await res.json();
+
+      document.getElementById("statusDot").className =
+        "status-dot" + (data.running ? " active" : "");
+      document.getElementById("statusText").textContent =
+        data.running ? "Online" : "Offline";
+      document.getElementById("statMode").textContent =
+        data.mode === "test" ? "🧪 Teste" : "🚀 Real";
+      document.getElementById("statExecuted").textContent =
+        data.executed_today;
+      document.getElementById("statNext").textContent =
+        data.next_signal ? data.next_signal.slice(11, 16) : "—";
+    } catch(e) {}
+  }
+
+  // ── Log ──────────────────────────────────────────────────
+  async function updateLog() {
+    const res = await fetch("/api/log");
+    const logs = await res.json();
+    const container = document.getElementById("logList");
+
+    if (logs.length === 0) {
+      container.innerHTML = '<div class="empty">Nenhuma execução ainda</div>';
+      return;
+    }
+
+    container.innerHTML = logs.map(l => `
+      <div class="log-item">
+        <span class="log-time">${l.time}</span>
+        <strong>${l.pair}</strong>
+        <span class="badge badge-${l.direction}">${l.direction.toUpperCase()}</span>
+        <span>${l.expiration}min</span>
+        <span>$${parseFloat(l.amount).toFixed(2)}</span>
+        <span class="badge badge-${l.mode === 'test' ? 'test' : (l.success ? 'ok' : 'fail')}">
+          ${l.mode === 'test' ? '🧪 TESTE' : (l.success ? '✅ OK' : '❌ ERRO')}
+        </span>
+      </div>
+    `).join('');
+  }
+
+  // ── Polling ──────────────────────────────────────────────
+  loadSignals();
+  updateStatus();
+  updateLog();
+  setInterval(() => { updateStatus(); updateLog(); }, 5000);
+  setInterval(loadSignals, 10000);
+</script>
+
+</body>
+</html>
