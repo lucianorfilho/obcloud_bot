@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  exnova-bot:
+    build: .
+    container_name: exnova-signal-bot
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./signals_data.json:/app/signals_data.json
+    restart: unless-stopped

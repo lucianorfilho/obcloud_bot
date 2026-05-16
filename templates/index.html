@@ -1,170 +1,125 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Exnova Signal Bot</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #0d1117;
-      color: #e6edf3;
-      min-height: 100vh;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e1e1e1; min-height: 100vh; }
 
     header {
-      background: #161b22;
-      border-bottom: 1px solid #30363d;
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    header h1 { font-size: 1.3rem; color: #58a6ff; }
-    header span { font-size: 0.85rem; color: #8b949e; }
-
-    .container { max-width: 1100px; margin: 0 auto; padding: 32px 16px; }
-
-    /* STATUS BAR */
-    .status-bar {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 10px;
+      background: #1a1d2e;
       padding: 16px 24px;
       display: flex;
       align-items: center;
-      gap: 24px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      border-bottom: 1px solid #2a2d3e;
     }
+    header h1 { font-size: 1.3rem; color: #7c6af7; }
+    #clock { font-size: 1.1rem; color: #a0a0b0; font-variant-numeric: tabular-nums; }
 
-    .status-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: #f85149;
-      display: inline-block;
-      margin-right: 6px;
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+    .status-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
     }
-    .status-dot.active { background: #3fb950; }
+    .status-card {
+      background: #1a1d2e;
+      border: 1px solid #2a2d3e;
+      border-radius: 10px;
+      padding: 14px 18px;
+    }
+    .status-card .label { font-size: .75rem; color: #7a7a9a; text-transform: uppercase; letter-spacing: .05em; }
+    .status-card .value { font-size: 1.1rem; font-weight: 600; margin-top: 4px; }
+    .online  { color: #4ade80; }
+    .offline { color: #f87171; }
+    .test-mode { color: #facc15; }
+    .real-mode { color: #60a5fa; }
 
-    .stat { display: flex; flex-direction: column; }
-    .stat label { font-size: 0.7rem; color: #8b949e; text-transform: uppercase; }
-    .stat span { font-size: 1rem; font-weight: 600; color: #e6edf3; }
-
+    .controls { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
     .btn {
-      padding: 9px 18px;
+      padding: 10px 20px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      font-size: .9rem;
       font-weight: 600;
-      font-size: 0.85rem;
-      transition: opacity 0.2s;
+      transition: opacity .2s;
     }
-    .btn:hover { opacity: 0.85; }
-    .btn-green { background: #238636; color: #fff; }
-    .btn-red   { background: #b62324; color: #fff; }
-    .btn-blue  { background: #1f6feb; color: #fff; }
-    .btn-gray  { background: #30363d; color: #e6edf3; }
+    .btn:hover { opacity: .85; }
+    .btn-yellow { background: #facc15; color: #1a1a1a; }
+    .btn-blue   { background: #3b82f6; color: #fff; }
+    .btn-red    { background: #ef4444; color: #fff; }
+    .btn-gray   { background: #374151; color: #e1e1e1; }
 
-    /* GRID */
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    @media(max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
 
     .card {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 10px;
-      padding: 24px;
+      background: #1a1d2e;
+      border: 1px solid #2a2d3e;
+      border-radius: 12px;
+      padding: 20px;
     }
-    .card h2 { font-size: 1rem; margin-bottom: 20px; color: #58a6ff; }
+    .card h2 { font-size: 1rem; margin-bottom: 16px; color: #a0a0c0; }
 
-    /* FORM */
-    .form-group { margin-bottom: 14px; }
-    .form-group label {
-      display: block;
-      font-size: 0.78rem;
-      color: #8b949e;
-      margin-bottom: 5px;
-      text-transform: uppercase;
-    }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: .8rem; color: #7a7a9a; margin-bottom: 4px; }
     .form-group input,
     .form-group select {
       width: 100%;
       padding: 9px 12px;
-      background: #0d1117;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      color: #e6edf3;
-      font-size: 0.9rem;
+      background: #0f1117;
+      border: 1px solid #2a2d3e;
+      border-radius: 7px;
+      color: #e1e1e1;
+      font-size: .9rem;
     }
-    .form-group input:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: #58a6ff;
-    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .signals-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .signals-table th { text-align: left; padding: 8px 10px; color: #7a7a9a; border-bottom: 1px solid #2a2d3e; }
+    .signals-table td { padding: 8px 10px; border-bottom: 1px solid #1e2030; }
+    .signals-table tr:hover td { background: #1e2035; }
 
-    /* TABLE */
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    th {
-      text-align: left;
-      padding: 8px 10px;
-      color: #8b949e;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      border-bottom: 1px solid #21262d;
+    .log-list { max-height: 280px; overflow-y: auto; }
+    .log-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #1e2030;
+      font-size: .85rem;
+      flex-wrap: wrap;
     }
-    td {
-      padding: 10px;
-      border-bottom: 1px solid #21262d;
-    }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #1c2128; }
+    .log-time { color: #7a7a9a; min-width: 70px; }
+    .empty { color: #4a4a6a; text-align: center; padding: 20px; }
 
     .badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: .75rem;
+      font-weight: 600;
     }
-    .badge-call { background: #1a3a2a; color: #3fb950; }
-    .badge-put  { background: #3a1a1a; color: #f85149; }
-    .badge-ok   { background: #1a3a2a; color: #3fb950; }
-    .badge-fail { background: #3a1a1a; color: #f85149; }
-    .badge-test { background: #1a2a3a; color: #58a6ff; }
+    .badge-call   { background: #14532d; color: #4ade80; }
+    .badge-put    { background: #450a0a; color: #f87171; }
+    .badge-otc    { background: #1e1b4b; color: #818cf8; }
+    .badge-normal { background: #1c3148; color: #60a5fa; }
+    .badge-ok     { background: #14532d; color: #4ade80; }
+    .badge-fail   { background: #450a0a; color: #f87171; }
+    .badge-test   { background: #422006; color: #facc15; }
 
-    .btn-del {
+    .delete-btn {
       background: none;
       border: none;
-      color: #f85149;
+      color: #ef4444;
       cursor: pointer;
       font-size: 1rem;
-    }
-
-    /* LOG */
-    .log-item {
-      padding: 10px;
-      border-bottom: 1px solid #21262d;
-      font-size: 0.82rem;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .log-item:last-child { border-bottom: none; }
-    .log-time { color: #8b949e; min-width: 60px; }
-
-    .empty { color: #8b949e; font-size: 0.85rem; text-align: center; padding: 20px; }
-
-    /* MODE TOGGLE */
-    .mode-toggle {
-      display: flex;
-      gap: 8px;
-      margin-left: auto;
+      padding: 2px 6px;
     }
   </style>
 </head>
@@ -177,111 +132,117 @@
 
 <div class="container">
 
-  <!-- STATUS BAR -->
+  <!-- Status -->
   <div class="status-bar">
-    <div style="display:flex;align-items:center">
-      <span class="status-dot" id="statusDot"></span>
-      <span id="statusText">Offline</span>
+    <div class="status-card">
+      <div class="label">Status</div>
+      <div class="value" id="statusVal">Offline</div>
     </div>
+    <div class="status-card">
+      <div class="label">Modo</div>
+      <div class="value" id="modeVal">—</div>
+    </div>
+    <div class="status-card">
+      <div class="label">Próximo Sinal</div>
+      <div class="value" id="nextVal">—</div>
+    </div>
+    <div class="status-card">
+      <div class="label">Executados Hoje</div>
+      <div class="value" id="execVal">0</div>
+    </div>
+  </div>
 
-    <div class="stat">
-      <label>Modo</label>
-      <span id="statMode">—</span>
-    </div>
-    <div class="stat">
-      <label>Executados hoje</label>
-      <span id="statExecuted">0</span>
-    </div>
-    <div class="stat">
-      <label>Próximo sinal</label>
-      <span id="statNext">—</span>
-    </div>
-
-    <div class="mode-toggle">
-      <button class="btn btn-blue" onclick="startBot('test')">▶ Modo Teste</button>
-      <button class="btn btn-green" onclick="startBot('live')">🚀 Modo Real</button>
-      <button class="btn btn-red" onclick="stopBot()">⏹ Parar</button>
-    </div>
+  <!-- Controles -->
+  <div class="controls">
+    <button class="btn btn-yellow" onclick="startBot('test')">🧪 Modo Teste</button>
+    <button class="btn btn-blue"   onclick="startBot('real')">🚀 Modo Real</button>
+    <button class="btn btn-red"    onclick="stopBot()">⏹ Parar Bot</button>
   </div>
 
   <div class="grid">
 
-    <!-- FORMULÁRIO DE SINAL -->
+    <!-- Formulário -->
     <div class="card">
       <h2>➕ Adicionar Sinal</h2>
 
       <div class="form-row">
         <div class="form-group">
           <label>Horário</label>
-          <input type="time" id="sigTime" />
+          <input type="time" id="sigTime" step="60">
         </div>
         <div class="form-group">
-          <label>Par de Moedas</label>
-          <select id="sigPair">
-            <option>EURUSD</option>
-            <option>GBPUSD</option>
-            <option>USDJPY</option>
-            <option>AUDUSD</option>
-            <option>USDCAD</option>
-            <option>USDCHF</option>
-            <option>NZDUSD</option>
-            <option>EURGBP</option>
-            <option>EURJPY</option>
-            <option>GBPJPY</option>
-            <option>AUDCAD</option>
-            <option>EURAUD</option>
+          <label>Mercado</label>
+          <select id="sigMarket" onchange="updatePairs()">
+            <option value="normal">Normal</option>
+            <option value="otc">OTC</option>
           </select>
         </div>
+      </div>
+
+      <div class="form-group">
+        <label>Par</label>
+        <select id="sigPair"></select>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Direção</label>
-          <select id="sigDirection">
+          <select id="sigDir">
             <option value="call">📈 CALL (Compra)</option>
             <option value="put">📉 PUT (Venda)</option>
           </select>
         </div>
         <div class="form-group">
           <label>Expiração (min)</label>
-          <select id="sigExpiration">
-            <option value="1">1 minuto</option>
-            <option value="2">2 minutos</option>
-            <option value="3">3 minutos</option>
-            <option value="5">5 minutos</option>
-            <option value="10">10 minutos</option>
-            <option value="15">15 minutos</option>
+          <select id="sigExp">
+            <option value="1">1 min</option>
+            <option value="2">2 min</option>
+            <option value="3">3 min</option>
+            <option value="5">5 min</option>
+            <option value="10">10 min</option>
+            <option value="15">15 min</option>
           </select>
         </div>
       </div>
 
       <div class="form-group">
-        <label>Valor da Operação ($)</label>
-        <input type="number" id="sigAmount" value="10" min="1" step="0.5" />
+        <label>Valor da operação ($)</label>
+        <input type="number" id="sigAmount" value="10" min="1" step="0.5">
       </div>
 
-      <button class="btn btn-blue" style="width:100%" onclick="addSignal()">
+      <button class="btn btn-blue" style="width:100%;margin-top:4px" onclick="addSignal()">
         ➕ Adicionar Sinal
       </button>
     </div>
 
-    <!-- LISTA DE SINAIS -->
+    <!-- Sinais agendados -->
     <div class="card">
-      <h2 style="display:flex;justify-content:space-between">
-        📋 Sinais do Dia
-        <button class="btn btn-gray" style="font-size:0.75rem;padding:5px 12px"
-          onclick="clearAll()">🗑 Limpar todos</button>
-      </h2>
-
-      <div id="signalsList">
-        <div class="empty">Nenhum sinal cadastrado</div>
-      </div>
+      <h2>📋 Sinais Agendados</h2>
+      <table class="signals-table">
+        <thead>
+          <tr>
+            <th>Horário</th>
+            <th>Par</th>
+            <th>Dir.</th>
+            <th>Exp.</th>
+            <th>Valor</th>
+            <th>Mercado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="signalsList">
+          <tr><td colspan="7" class="empty">Nenhum sinal</td></tr>
+        </tbody>
+      </table>
+      <button class="btn btn-gray" style="margin-top:12px;font-size:.8rem" onclick="clearAll()">
+        🗑 Limpar Todos
+      </button>
     </div>
 
-    <!-- LOG DE EXECUÇÃO -->
+    <!-- Log -->
     <div class="card" style="grid-column: 1 / -1">
       <h2>📜 Log de Execuções</h2>
-      <div id="logList">
+      <div class="log-list" id="logList">
         <div class="empty">Nenhuma execução ainda</div>
       </div>
     </div>
@@ -290,168 +251,175 @@
 </div>
 
 <script>
-  // ── Relógio ──────────────────────────────────────────────
-  function updateClock() {
-    const now = new Date();
-    document.getElementById("clock").textContent =
-      now.toLocaleTimeString("pt-BR");
-  }
-  setInterval(updateClock, 1000);
-  updateClock();
+// ── Pares ─────────────────────────────────────────────────────────────
+const PAIRS_NORMAL = [
+  "EURUSD","GBPUSD","USDJPY","USDCHF","AUDUSD","USDCAD",
+  "NZDUSD","EURGBP","EURJPY","GBPJPY","EURAUD","EURCHF",
+  "AUDCAD","AUDCHF","AUDJPY","CADJPY","CHFJPY","EURCAD",
+  "EURNZD","GBPAUD","GBPCAD","GBPCHF","GBPNZD","NZDCAD",
+  "NZDCHF","NZDJPY","XAUUSD","XAGUSD"
+];
 
-  // ── Adicionar sinal ──────────────────────────────────────
-  async function addSignal() {
-    const signal = {
-      time:       document.getElementById("sigTime").value,
-      pair:       document.getElementById("sigPair").value,
-      direction:  document.getElementById("sigDirection").value,
-      expiration: parseInt(document.getElementById("sigExpiration").value),
-      amount:     parseFloat(document.getElementById("sigAmount").value),
-    };
+const PAIRS_OTC = [
+  "EURUSD-OTC","GBPUSD-OTC","USDJPY-OTC","USDCHF-OTC",
+  "AUDUSD-OTC","USDCAD-OTC","NZDUSD-OTC","EURGBP-OTC",
+  "EURJPY-OTC","GBPJPY-OTC","EURAUD-OTC","EURCHF-OTC",
+  "AUDCAD-OTC","AUDCHF-OTC","AUDJPY-OTC","CADJPY-OTC",
+  "CHFJPY-OTC","EURCAD-OTC","EURNZD-OTC","GBPAUD-OTC",
+  "GBPCAD-OTC","GBPCHF-OTC","GBPNZD-OTC","NZDCAD-OTC",
+  "NZDCHF-OTC","NZDJPY-OTC","XAUUSD-OTC","XAGUSD-OTC"
+];
 
-    if (!signal.time) { alert("Informe o horário do sinal!"); return; }
+function updatePairs() {
+  const market = document.getElementById("sigMarket").value;
+  const pairs  = market === "otc" ? PAIRS_OTC : PAIRS_NORMAL;
+  const sel    = document.getElementById("sigPair");
+  sel.innerHTML = pairs.map(p =>
+    `<option value="${p}">${p}</option>`
+  ).join("");
+}
+updatePairs();
 
-    const res = await fetch("/api/signals", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(signal),
-    });
+// ── Relógio ───────────────────────────────────────────────────────────
+function updateClock() {
+  document.getElementById("clock").textContent =
+    new Date().toLocaleTimeString("pt-BR");
+}
+setInterval(updateClock, 1000);
+updateClock();
 
-    if (res.ok) {
-      loadSignals();
-    } else {
-      alert("Erro ao adicionar sinal!");
-    }
-  }
+// ── API helper ────────────────────────────────────────────────────────
+async function api(url, opts = {}) {
+  const res = await fetch(url, {
+    headers: { "Content-Type": "application/json" },
+    ...opts
+  });
+  return res.json();
+}
 
-  // ── Carregar sinais ──────────────────────────────────────
-  async function loadSignals() {
-    const res = await fetch("/api/signals");
-    const signals = await res.json();
-    const container = document.getElementById("signalsList");
+// ── Status ────────────────────────────────────────────────────────────
+async function updateStatus() {
+  const d = await api("/api/status");
 
-    if (signals.length === 0) {
-      container.innerHTML = '<div class="empty">Nenhum sinal cadastrado</div>';
-      return;
-    }
+  const statusEl = document.getElementById("statusVal");
+  statusEl.textContent = d.running ? "Online" : "Offline";
+  statusEl.className   = "value " + (d.running ? "online" : "offline");
 
-    // Ordena por horário
-    signals.sort((a, b) => a.time.localeCompare(b.time));
-
-    container.innerHTML = `
-      <table>
-        <thead>
-          <tr>
-            <th>Hora</th>
-            <th>Par</th>
-            <th>Direção</th>
-            <th>Exp.</th>
-            <th>Valor</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          ${signals.map(s => `
-            <tr>
-              <td><strong>${s.time}</strong></td>
-              <td>${s.pair}</td>
-              <td>
-                <span class="badge badge-${s.direction}">
-                  ${s.direction === 'call' ? '📈 CALL' : '📉 PUT'}
-                </span>
-              </td>
-              <td>${s.expiration}min</td>
-              <td>$${parseFloat(s.amount).toFixed(2)}</td>
-              <td>
-                <button class="btn-del" onclick="deleteSignal(${s.id})">✕</button>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
+  const modeEl = document.getElementById("modeVal");
+  if (d.mode === "test") {
+    modeEl.textContent = "🧪 Teste";
+    modeEl.className   = "value test-mode";
+  } else {
+    modeEl.textContent = "🚀 Real";
+    modeEl.className   = "value real-mode";
   }
 
-  // ── Deletar sinal ────────────────────────────────────────
-  async function deleteSignal(id) {
-    await fetch(`/api/signals/${id}`, { method: "DELETE" });
-    loadSignals();
+  const next = d.next_signal;
+  document.getElementById("nextVal").textContent =
+    next ? next.split(" ")[1]?.slice(0, 5) ?? "—" : "—";
+
+  document.getElementById("execVal").textContent = d.executed_today ?? 0;
+}
+
+// ── Log ───────────────────────────────────────────────────────────────
+async function updateLog() {
+  const logs = await api("/api/log");
+  const el   = document.getElementById("logList");
+
+  if (!logs.length) {
+    el.innerHTML = '<div class="empty">Nenhuma execução ainda</div>';
+    return;
   }
 
-  // ── Limpar todos ─────────────────────────────────────────
-  async function clearAll() {
-    if (!confirm("Limpar todos os sinais?")) return;
-    await fetch("/api/signals/clear", { method: "DELETE" });
-    loadSignals();
+  el.innerHTML = logs.map(l => `
+    <div class="log-item">
+      <span class="log-time">${l.time}</span>
+      <strong>${l.pair}</strong>
+      <span class="badge badge-${l.direction}">${l.direction.toUpperCase()}</span>
+      <span class="badge badge-${l.market === 'OTC' ? 'otc' : 'normal'}">${l.market}</span>
+      <span>${l.expiration}min</span>
+      <span>$${parseFloat(l.amount).toFixed(2)}</span>
+      <span class="badge badge-${l.mode === 'test' ? 'test' : (l.success ? 'ok' : 'fail')}">
+        ${l.mode === 'test' ? '🧪 TESTE' : (l.success ? '✅ OK' : '❌ ERRO')}
+      </span>
+    </div>
+  `).join("");
+}
+
+// ── Sinais ────────────────────────────────────────────────────────────
+async function loadSignals() {
+  const signals = await api("/api/signals");
+  const tbody   = document.getElementById("signalsList");
+
+  if (!signals.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum sinal</td></tr>';
+    return;
   }
 
-  // ── Iniciar bot ──────────────────────────────────────────
-  async function startBot(mode) {
-    const label = mode === 'test' ? 'TESTE' : 'REAL';
-    if (mode === 'live' && !confirm(`⚠️ Iniciar em modo REAL?\nIsso vai executar operações com dinheiro real!`)) return;
-
-    await fetch("/api/bot/start", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode }),
-    });
-  }
-
-  // ── Parar bot ────────────────────────────────────────────
-  async function stopBot() {
-    await fetch("/api/bot/stop", { method: "POST" });
-  }
-
-  // ── Status ───────────────────────────────────────────────
-  async function updateStatus() {
-    try {
-      const res = await fetch("/api/status");
-      const data = await res.json();
-
-      document.getElementById("statusDot").className =
-        "status-dot" + (data.running ? " active" : "");
-      document.getElementById("statusText").textContent =
-        data.running ? "Online" : "Offline";
-      document.getElementById("statMode").textContent =
-        data.mode === "test" ? "🧪 Teste" : "🚀 Real";
-      document.getElementById("statExecuted").textContent =
-        data.executed_today;
-      document.getElementById("statNext").textContent =
-        data.next_signal ? data.next_signal.slice(11, 16) : "—";
-    } catch(e) {}
-  }
-
-  // ── Log ──────────────────────────────────────────────────
-  async function updateLog() {
-    const res = await fetch("/api/log");
-    const logs = await res.json();
-    const container = document.getElementById("logList");
-
-    if (logs.length === 0) {
-      container.innerHTML = '<div class="empty">Nenhuma execução ainda</div>';
-      return;
-    }
-
-    container.innerHTML = logs.map(l => `
-      <div class="log-item">
-        <span class="log-time">${l.time}</span>
-        <strong>${l.pair}</strong>
-        <span class="badge badge-${l.direction}">${l.direction.toUpperCase()}</span>
-        <span>${l.expiration}min</span>
-        <span>$${parseFloat(l.amount).toFixed(2)}</span>
-        <span class="badge badge-${l.mode === 'test' ? 'test' : (l.success ? 'ok' : 'fail')}">
-          ${l.mode === 'test' ? '🧪 TESTE' : (l.success ? '✅ OK' : '❌ ERRO')}
+  tbody.innerHTML = signals.map(s => `
+    <tr>
+      <td>${s.time}</td>
+      <td>${s.pair}</td>
+      <td><span class="badge badge-${s.direction}">${s.direction.toUpperCase()}</span></td>
+      <td>${s.expiration}min</td>
+      <td>$${parseFloat(s.amount).toFixed(2)}</td>
+      <td>
+        <span class="badge badge-${s.market === 'otc' ? 'otc' : 'normal'}">
+          ${s.market === 'otc' ? 'OTC' : 'Normal'}
         </span>
-      </div>
-    `).join('');
-  }
+      </td>
+      <td><button class="delete-btn" onclick="deleteSignal(${s.id})">✕</button></td>
+    </tr>
+  `).join("");
+}
 
-  // ── Polling ──────────────────────────────────────────────
+async function addSignal() {
+  const time       = document.getElementById("sigTime").value;
+  const pair       = document.getElementById("sigPair").value;
+  const direction  = document.getElementById("sigDir").value;
+  const expiration = parseInt(document.getElementById("sigExp").value);
+  const amount     = parseFloat(document.getElementById("sigAmount").value);
+  const market     = document.getElementById("sigMarket").value;
+
+  if (!time) { alert("Informe o horário do sinal."); return; }
+
+  await api("/api/signals", {
+    method: "POST",
+    body: JSON.stringify({ time, pair, direction, expiration, amount, market })
+  });
+
   loadSignals();
+}
+
+async function deleteSignal(id) {
+  await api(`/api/signals/${id}`, { method: "DELETE" });
+  loadSignals();
+}
+
+async function clearAll() {
+  if (!confirm("Remover todos os sinais?")) return;
+  await api("/api/signals/clear", { method: "DELETE" });
+  loadSignals();
+}
+
+// ── Bot ───────────────────────────────────────────────────────────────
+async function startBot(mode) {
+  if (mode === "real" && !confirm("⚠️ Iniciar em MODO REAL?\nIsso vai executar operações com dinheiro real!")) return;
+  await api("/api/bot/start", { method: "POST", body: JSON.stringify({ mode }) });
   updateStatus();
-  updateLog();
-  setInterval(() => { updateStatus(); updateLog(); }, 5000);
-  setInterval(loadSignals, 10000);
+}
+
+async function stopBot() {
+  await api("/api/bot/stop", { method: "POST" });
+  updateStatus();
+}
+
+// ── Polling ───────────────────────────────────────────────────────────
+loadSignals();
+updateStatus();
+updateLog();
+setInterval(() => { updateStatus(); updateLog(); }, 5000);
+setInterval(loadSignals, 10000);
 </script>
 
 </body>

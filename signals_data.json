@@ -1,0 +1,11 @@
+[
+  {
+    "time": "14:40",
+    "pair": "EURUSD",
+    "direction": "call",
+    "expiration": 1,
+    "amount": 2,
+    "id": 1778866761.288405,
+    "status": "pending"
+  }
+]
